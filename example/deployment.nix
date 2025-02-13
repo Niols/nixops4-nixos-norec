@@ -4,7 +4,6 @@
   lib,
   providers,
   withResourceProviderSystem,
-  resourceProviderSystem,
   ...
 }:
 let

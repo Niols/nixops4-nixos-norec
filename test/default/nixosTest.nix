@@ -117,7 +117,7 @@ testers.runNixOSTest (
         deployer_public_key = deployer.succeed("cat ~/.ssh/id_rsa.pub").strip()
         target.succeed("mkdir -p /root/.ssh && echo '{}' >> /root/.ssh/authorized_keys".format(deployer_public_key))
         host_public_key = target.succeed("ssh-keyscan target | grep -v '^#' | cut -f 2- -d ' ' | head -n 1")
-        extra_config = f"""
+        generated_config = f"""
           {{ lib, ... }}: {{
             resources.nixos.ssh.hostPublicKey = lib.mkForce "{host_public_key}";
             resources.nixos.nixos.module = {{
@@ -127,7 +127,7 @@ testers.runNixOSTest (
             }};
           }}
           """
-        deployer.succeed(f"""cat > work/example/generated.nix <<"_EOF_"\n{extra_config}\n_EOF_\n""")
+        deployer.succeed(f"""cat > work/example/generated.nix <<"_EOF_"\n{generated_config}\n_EOF_\n""")
         deployer.succeed("""
           cat -n work/example/generated.nix 1>&2;
           nix-instantiate work/example/generated.nix --eval --parse >/dev/null
