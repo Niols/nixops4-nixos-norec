@@ -4,7 +4,6 @@
   lib,
   providers,
   withResourceProviderSystem,
-  resourceProviderSystem,
   ...
 }:
 let
@@ -66,11 +65,14 @@ in
 
           users.users.root.openssh.authorizedKeys.keyFiles = [ pubKeysFile ];
           users.users.root.initialPassword = "asdf";
-          users.users.user.openssh.authorizedKeys.keyFiles = [ pubKeysFile ];
-          users.users.user.initialPassword = "asdf";
-          users.users.user.isNormalUser = true;
-          users.users.user.group = "user";
-          users.groups.user = { };
+          users.users.bossmang.openssh.authorizedKeys.keyFiles = [ pubKeysFile ];
+          users.users.bossmang.isNormalUser = true;
+          users.users.bossmang.group = "bossmang";
+          users.users.bossmang.extraGroups = [ "wheel" ];
+          users.groups.bossmang = { };
+
+          security.sudo.execWheelOnly = true; # hardening
+          security.sudo.wheelNeedsPassword = false; # can not be entered through NixOps
 
           # end hardware config
 

@@ -41,6 +41,15 @@ in
       type = types.str;
       default = "";
     };
+    sudo.enable = mkOption {
+      type = types.bool;
+      default = config.ssh.user != "root";
+      defaultText = lib.literalMD ''`false` iff `config.ssh.user` is `"root"`'';
+      description = ''
+        Whether to call `sudo` when applying the configuration.
+        This is necessary when the user is not `root`.
+      '';
+    };
   };
   config = {
     nixos = {
@@ -65,7 +74,7 @@ in
             ''
           } "${lib.strings.escapeShellArg "${config.ssh.opts}"}
           nix copy --to "ssh-ng://$0" "$1" --no-check-sigs --extra-experimental-features nix-command
-          ssh $NIX_SSHOPTS "$0" "$1/bin/apply switch"
+          ssh $NIX_SSHOPTS "$0" "${lib.optionalString config.sudo.enable "sudo "}$1/bin/apply switch"
         ''
         "${config.ssh.user}@${config.ssh.host}"
         config.nixos.configuration.config.system.build.toplevel
