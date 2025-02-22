@@ -28,8 +28,13 @@ in
       default = { };
     };
     ssh.user = mkOption {
-      type = types.str;
+      type = types.nullOr types.str;
       default = "root";
+      description = ''
+        The user name to use for the SSH connection.
+
+        When explicitly set to `null`, the user name will be chosen by the SSH client based on its configuration, which may include the `User` directive in `~/.ssh/config` or the login name under which the `nixops4` process runs.
+      '';
     };
     ssh.host = mkOption {
       type = types.str;
@@ -82,7 +87,7 @@ in
           nix copy --to "ssh-ng://$0" "$1" --no-check-sigs --extra-experimental-features nix-command
           ssh $NIX_SSHOPTS "$0" "${lib.optionalString config.sudo.enable "sudo "}$1/bin/apply switch"
         ''
-        "${config.ssh.user}@${config.ssh.host}"
+        (lib.optionalString (config.ssh.user != null) "${config.ssh.user}@" + config.ssh.host)
         config.nixos.configuration.config.system.build.toplevel
       ];
     };
