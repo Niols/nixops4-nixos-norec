@@ -193,6 +193,127 @@ testers.runNixOSTest (
           )
         """)
 
+      with subtest("use ssh ambient user"):
+        with subtest("set up to deny root login"):
+          with subtest("configure deployment to deny root login on target"):
+            extra_config = """
+              { lib, ... }: {
+                resources.nixos.nixos.module.services.openssh.settings.PermitRootLogin = lib.mkForce "no";
+              }
+              """
+            deployer.succeed(f"""cat > work/example/extra-deployment-config.nix <<"_EOF_"\n{extra_config}\n_EOF_\n""")
+          with subtest("nixops4 apply"):
+            deployer.succeed("""
+              (
+                cd work
+                set -x
+                nixops4 apply test --show-trace
+              )
+            """)
+          with subtest("check assumption: root is denied"):
+            deployer.succeed(f"""
+              (
+                set -x
+                echo "target {host_public_key}" > target-host-key
+                # assume pipefail semantics
+                ! ( false | true )
+                (
+                  set +e
+                  ssh -o ConnectTimeout=10 \
+                      -o ConnectionAttempts=12 \
+                      -o KbdInteractiveAuthentication=no \
+                      -o PasswordAuthentication=no \
+                      -o UserKnownHostsFile="$PWD/target-host-key" \
+                      -o StrictHostKeyChecking=yes \
+                      -v \
+                      2>&1 \
+                    target \
+                    true
+                  r=$?
+                  echo "ssh exit status: $r" 1>&2
+                  [[ $r -eq 255 ]]
+                ) | tee ssh.log
+                grep -F 'root@target: Permission denied (' ssh.log
+                rm ssh.log
+              )
+            """)
+          with subtest("configure user in ~/.ssh/config"):
+            deployer.succeed("""
+              mkdir -p ~/.ssh
+              (
+                echo 'Host target'
+                echo '  User bossmang'
+              ) > ~/.ssh/config
+              cat -n ~/.ssh/config
+            """)
+          with subtest("check assumption: user is allowed"):
+            deployer.succeed(f"""
+              (
+                set -x
+                echo "target {host_public_key}" > target-host-key
+                ssh -o ConnectTimeout=10 \
+                    -o ConnectionAttempts=12 \
+                    -o KbdInteractiveAuthentication=no \
+                    -o PasswordAuthentication=no \
+                    -o UserKnownHostsFile="$PWD/target-host-key" \
+                    -o StrictHostKeyChecking=yes \
+                    -v \
+                    2>&1 \
+                  target \
+                  true
+              )
+            """)
+          with subtest("clean up"):
+            deployer.succeed("""
+              rm ~/.ssh/config
+            """)
+
+        with subtest("check error propagation through resource and nixops4"):
+          deployer.succeed("""
+            (
+              cd work
+              set -x
+              (
+                set +e
+                nixops4 apply test --show-trace 2>&1
+                r=$?
+                echo "nixops4 exit status: $r" 1>&2
+                [[ $r -eq 1 ]]
+              ) | tee nixops4.log
+              grep -F 'root@target: Permission denied' nixops4.log
+              rm nixops4.log
+            )
+          """)
+
+        with subtest("configure user in ~/.ssh/config"):
+          deployer.succeed("""
+            mkdir -p ~/.ssh
+            (
+              echo 'Host target'
+              echo '  User bossmang'
+            ) > ~/.ssh/config
+            cat -n ~/.ssh/config
+          """)
+
+        with subtest("configure deployment to use ambient user"):
+          extra_config = """
+            { lib, ... }: {
+              resources.nixos.nixos.module.services.openssh.settings.PermitRootLogin = lib.mkForce "no";
+              resources.nixos.ssh.user = null;
+            }
+            """
+          deployer.succeed(f"""cat > work/example/extra-deployment-config.nix <<"_EOF_"\n{extra_config}\n_EOF_\n""")
+
+        with subtest("can deploy with ambient user setting"):
+          deployer.succeed("""
+            (
+              cd work
+              set -x
+              nixops4 apply test --show-trace
+            )
+          """)
+
+
       # TODO: nixops4 run feature, calling ssh
     '';
   }
