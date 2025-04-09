@@ -133,6 +133,7 @@ testers.runNixOSTest (
           cp ~/.ssh/id_rsa.pub work/example/deployer.pub
           cat -n work/example/generated.nix 1>&2;
           echo {} > work/example/extra-deployment-config.nix
+          # Fail early if we made a syntax mistake in generated.nix. (following commands may be slow)
           nix-instantiate work/example/generated.nix --eval --parse >/dev/null
         """)
 
