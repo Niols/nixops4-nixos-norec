@@ -525,7 +525,6 @@
         "flake-parts": "flake-parts",
         "git-hooks-nix": "git-hooks-nix",
         "nixops4": "nixops4",
-        "nixops4-nixos": [],
         "nixpkgs": [
           "nixops4",
           "nixpkgs"
