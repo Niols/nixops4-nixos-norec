@@ -16,7 +16,7 @@ testers.runNixOSTest (
   let
     vmSystem = config.node.pkgs.hostPlatform.system;
 
-    # TODO turn example directory into a flake, and refer to the whole repo only
+    # TODO turn test/default directory into a flake, and refer to the whole repo only
     #      as a flake input
     src = lib.fileset.toSource {
       fileset = ../..;
@@ -118,7 +118,7 @@ testers.runNixOSTest (
             set -x
             mkdir -p ~/.ssh
             ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
-            mv /root/target-network.json example/target-network.json
+            mv /root/target-network.json test/default/target-network.json
           )
         """)
         deployer_public_key = deployer.succeed("cat ~/.ssh/id_rsa.pub").strip()
@@ -135,13 +135,13 @@ testers.runNixOSTest (
             }};
           }}
           """
-        deployer.succeed(f"""cat > work/example/generated.nix <<"_EOF_"\n{generated_config}\n_EOF_\n""")
+        deployer.succeed(f"""cat > work/test/default/generated.nix <<"_EOF_"\n{generated_config}\n_EOF_\n""")
         deployer.succeed("""
-          cp ~/.ssh/id_rsa.pub work/example/deployer.pub
-          cat -n work/example/generated.nix 1>&2;
-          echo {} > work/example/extra-deployment-config.nix
+          cp ~/.ssh/id_rsa.pub work/test/default/deployer.pub
+          cat -n work/test/default/generated.nix 1>&2;
+          echo {} > work/test/default/extra-deployment-config.nix
           # Fail early if we made a syntax mistake in generated.nix. (following commands may be slow)
-          nix-instantiate work/example/generated.nix --eval --parse >/dev/null
+          nix-instantiate work/test/default/generated.nix --eval --parse >/dev/null
         """)
 
       # This is slow, but could be optimized in Nix.
@@ -201,7 +201,7 @@ testers.runNixOSTest (
             resources.nixos.ssh.user = "bossmang";
           }
           """
-        deployer.succeed(f"""cat > work/example/extra-deployment-config.nix <<"_EOF_"\n{extra_config}\n_EOF_\n""")
+        deployer.succeed(f"""cat > work/test/default/extra-deployment-config.nix <<"_EOF_"\n{extra_config}\n_EOF_\n""")
         deployer.succeed("""
           (
             cd work
@@ -218,7 +218,7 @@ testers.runNixOSTest (
                 resources.nixos.nixos.module.services.openssh.settings.PermitRootLogin = lib.mkForce "no";
               }
               """
-            deployer.succeed(f"""cat > work/example/extra-deployment-config.nix <<"_EOF_"\n{extra_config}\n_EOF_\n""")
+            deployer.succeed(f"""cat > work/test/default/extra-deployment-config.nix <<"_EOF_"\n{extra_config}\n_EOF_\n""")
           with subtest("nixops4 apply"):
             deployer.succeed("""
               (
@@ -319,7 +319,7 @@ testers.runNixOSTest (
               resources.nixos.ssh.user = null;
             }
             """
-          deployer.succeed(f"""cat > work/example/extra-deployment-config.nix <<"_EOF_"\n{extra_config}\n_EOF_\n""")
+          deployer.succeed(f"""cat > work/test/default/extra-deployment-config.nix <<"_EOF_"\n{extra_config}\n_EOF_\n""")
 
         with subtest("can deploy with ambient user setting"):
           deployer.succeed("""

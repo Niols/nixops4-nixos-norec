@@ -18,12 +18,10 @@
   outputs = inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = ["x86_64-linux"];
-      imports = [ ./example/flake-module.nix ];
-      perSystem = { inputs', pkgs, ... }: {
-        checks.default = pkgs.callPackage ./test/default/nixosTest.nix {
-          nixops4-flake-in-a-bottle = inputs'.nixops4.packages.flake-in-a-bottle;
-          inherit inputs;
-        };
-      };
+
+      imports = [
+        inputs.nixops4.modules.flake.default
+        ./test/default/flake-module.nix
+      ];
     };
 }
