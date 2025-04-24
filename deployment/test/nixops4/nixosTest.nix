@@ -176,7 +176,7 @@ testers.runNixOSTest (
             cd work
             set -x
             # "test" is the name of the deployment
-            nixops4 apply test --show-trace
+            nixops4 apply deployment-test-nixops4 --show-trace
           )
         """)
 
@@ -206,7 +206,7 @@ testers.runNixOSTest (
           (
             cd work
             set -x
-            nixops4 apply test --show-trace
+            nixops4 apply deployment-test-nixops4 --show-trace
           )
         """)
 
@@ -224,7 +224,7 @@ testers.runNixOSTest (
               (
                 cd work
                 set -x
-                nixops4 apply test --show-trace
+                nixops4 apply deployment-test-nixops4 --show-trace
               )
             """)
           with subtest("check assumption: root is denied"):
@@ -292,7 +292,7 @@ testers.runNixOSTest (
               set -x
               (
                 set +e
-                nixops4 apply test --show-trace 2>&1
+                nixops4 apply deployment-test-nixops4 --show-trace 2>&1
                 r=$?
                 echo "nixops4 exit status: $r" 1>&2
                 [[ $r -eq 1 ]]
@@ -326,7 +326,7 @@ testers.runNixOSTest (
             (
               cd work
               set -x
-              nixops4 apply test --show-trace
+              nixops4 apply deployment-test-nixops4 --show-trace
             )
           """)
 
