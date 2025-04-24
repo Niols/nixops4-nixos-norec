@@ -165,7 +165,7 @@ testers.runNixOSTest (
               --override-input nixops4-nixos/git-hooks-nix ${emptyFlake} \
               \
               --override-input nixpkgs ${inputs.nixpkgs} \
-              --override-input git-hooks-nix ${inputs.git-hooks-nix} \
+              --override-input git-hooks ${inputs.git-hooks} \
               ;
           )
         """)
