@@ -15,44 +15,14 @@
     git-hooks-nix.url = "github:cachix/git-hooks.nix";
   };
 
-  outputs =
-    inputs@{ flake-parts, ... }:
-    {
-      inherit
-        (flake-parts.lib.mkFlake { inherit inputs; } {
-          imports = [
-            inputs.flake-parts.flakeModules.partitions
-            inputs.flake-parts.flakeModules.modules
-            ./main-module.nix
-          ];
-          systems = [
-            "x86_64-linux"
-            "aarch64-linux"
-            "aarch64-darwin"
-            "x86_64-darwin"
-          ];
-          partitions.dev.module = {
-            imports = [
-              ./dev/flake-module.nix
-              ./example/flake-module.nix
-            ];
-          };
-          partitionedAttrs.devShells = "dev";
-          partitionedAttrs.checks = "dev";
-          partitionedAttrs.nixops4Deployments = "dev";
-          partitionedAttrs.herculesCI = "dev";
-        })
-        modules
-        devShells
-        checks
-        /**
-          Example configurations used in integration tests.
-        */
-        nixops4Deployments
-        /**
-          Continuous integration settings
-        */
-        herculesCI
-        ;
+  outputs = inputs@{ flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = ["x86_64-linux"];
+      perSystem = { inputs', pkgs, ... }: {
+        checks.default = pkgs.callPackage ./test/default/nixosTest.nix {
+          nixops4-flake-in-a-bottle = inputs'.nixops4.packages.flake-in-a-bottle;
+          inherit inputs;
+        };
+      };
     };
 }
