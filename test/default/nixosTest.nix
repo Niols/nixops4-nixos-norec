@@ -155,8 +155,15 @@ testers.runNixOSTest (
               --offline -v \
               --override-input flake-parts ${inputs.flake-parts} \
               --override-input nixops4 ${nixops4-flake-in-a-bottle} \
+              \
               --override-input nixops4-nixos ${inputs.nixops4-nixos} \
+              --override-input nixops4-nixos/flake-parts ${inputs.nixops4-nixos.inputs.flake-parts} \
+              --override-input nixops4-nixos/flake-parts/nixpkgs-lib ${inputs.nixops4-nixos.inputs.flake-parts.inputs.nixpkgs-lib} \
               --override-input nixops4-nixos/nixops4-nixos ${emptyFlake} \
+              --override-input nixops4-nixos/nixpkgs ${inputs.nixops4-nixos.inputs.nixpkgs} \
+              --override-input nixops4-nixos/nixops4 ${nixops4-flake-in-a-bottle} \
+              --override-input nixops4-nixos/git-hooks-nix ${emptyFlake} \
+              \
               --override-input nixpkgs ${inputs.nixpkgs} \
               --override-input git-hooks-nix ${inputs.git-hooks-nix} \
               ;
