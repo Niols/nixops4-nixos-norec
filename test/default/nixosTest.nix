@@ -1,6 +1,7 @@
 {
   testers,
   inputs,
+  runCommandNoCC,
   nixops4-flake-in-a-bottle,
   ...
 }:
@@ -21,6 +22,12 @@ testers.runNixOSTest (
       fileset = ../..;
       root = ../..;
     };
+
+    ## We will need to override some inputs by the empty flake, so we make one.
+    emptyFlake = runCommandNoCC "empty-flake" { } ''
+      mkdir $out
+      echo "{ outputs = { self }: {}; }" > $out/flake.nix
+    '';
 
     targetNetworkJSON = hostPkgs.writeText "target-network.json" (
       builtins.toJSON config.nodes.target.system.build.networkConfig
@@ -149,6 +156,7 @@ testers.runNixOSTest (
               --override-input flake-parts ${inputs.flake-parts} \
               --override-input nixops4 ${nixops4-flake-in-a-bottle} \
               --override-input nixops4-nixos ${inputs.nixops4-nixos} \
+              --override-input nixops4-nixos/nixops4-nixos ${emptyFlake} \
               --override-input nixpkgs ${inputs.nixpkgs} \
               --override-input git-hooks-nix ${inputs.git-hooks-nix} \
               ;
