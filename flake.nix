@@ -21,7 +21,7 @@
 
       imports = [
         inputs.nixops4.modules.flake.default
-        ./test/default/flake-module.nix
+        ./deployment/test/nixops4/flake-part.nix
       ];
     };
 }
