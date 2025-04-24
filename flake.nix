@@ -3,7 +3,7 @@
 
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
-    nixops4-nixos.follows = ""; # self
+    nixops4-nixos.url = "github:nixops4/nixops4-nixos";
 
     # Dev dependencies
     # These need to be in the main flake for now, because we can't easily pre-fetch the private flake-compat dependency in flake-parts.
